@@ -1,3 +1,6 @@
 .idea/
 Automation.iml
 authToken.txt
+log/
+drivers/
+target/
