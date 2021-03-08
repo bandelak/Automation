@@ -1,17 +1,19 @@
 package support;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.*;
+import pages.CommonPage;
 import pages.HomePage;
 import pages.LoginPage;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,11 @@ public class Base {
     public Logger logger = LogManager.getLogger(Base.class);
     String  methodName;
     public static WebDriver driver;
+    public static HardAssertion hardAssert=new HardAssertion();
+    public static SoftAssertion softAssert=new SoftAssertion();
+    public static ExtentReports extent=new ExtentReports();
+    public static ExtentSparkReporter spark;
+    public static ExtentTest extentTest;
 
 
     @BeforeSuite
@@ -42,6 +49,8 @@ public class Base {
                 driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
                 logger.info(String.format("browser successfully initialized in %s",methodName));
             }
+            spark=new ExtentSparkReporter("spark.html");
+            extent.attachReporter(spark);
         }catch(Exception ex){
             logger.error(String.format("error in method '%s' and its description is '%s'",methodName,ex.getMessage()));
             exit(0);
@@ -63,12 +72,19 @@ public class Base {
         }
     }
 
+    @BeforeMethod
+    public void beforeMethod(Method method){
+        extentTest = extent.createTest(method.getName()).createNode(method.getName());
+        logger.info(methodName+" test report with given test script started");
+    }
+
     @AfterClass
     public void afterClass(){
         methodName="afterClass";
         try{
-            HomePage.clickLogout();
+            CommonPage.clickLogout();
             logger.info("Logged out successfully");
+            extent.flush();
         }catch(Exception ex){
             logger.error(String.format("error in method '%s' and its description is '%s'",methodName,ex.getMessage()));
         }

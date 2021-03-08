@@ -4,3 +4,5 @@ authToken.txt
 log/
 drivers/
 target/
+index.html
+src/main/resources/FailedScreenshots/
